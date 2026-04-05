@@ -21,7 +21,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(CsvThumbnailHandler),
                     $"Generating thumbnail, width={width}");
 
-                return CsvRenderer.Render(SelectedItemStream, width);
+                var bmp = CsvRenderer.Render(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "CSV");
             }
             catch (Exception ex)
             {

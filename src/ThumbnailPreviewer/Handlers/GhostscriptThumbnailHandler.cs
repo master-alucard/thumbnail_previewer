@@ -22,7 +22,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(GhostscriptThumbnailHandler),
                     $"Generating thumbnail, width={width}");
 
-                return GhostscriptRenderer.Render(SelectedItemStream, width);
+                var bmp = GhostscriptRenderer.Render(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "EPS");
             }
             catch (Exception ex)
             {

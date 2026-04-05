@@ -25,7 +25,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(ImageThumbnailHandler),
                     $"Generating thumbnail, width={width}");
 
-                return MagickRenderer.RenderImage(SelectedItemStream, width);
+                var bmp = MagickRenderer.RenderImage(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "IMG");
             }
             catch (Exception ex)
             {
@@ -59,7 +60,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(RawThumbnailHandler),
                     $"Generating RAW thumbnail, width={width}");
 
-                return MagickRenderer.RenderRaw(SelectedItemStream, width);
+                var bmp = MagickRenderer.RenderRaw(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "RAW");
             }
             catch (Exception ex)
             {

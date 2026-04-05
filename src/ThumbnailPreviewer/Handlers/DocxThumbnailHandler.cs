@@ -20,7 +20,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(DocxThumbnailHandler),
                     $"Generating thumbnail, width={width}");
 
-                return DocxRenderer.Render(SelectedItemStream, width);
+                var bmp = DocxRenderer.Render(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "DOCX");
             }
             catch (Exception ex)
             {

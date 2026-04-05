@@ -24,7 +24,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(PdfThumbnailHandler),
                     $"Generating PDF thumbnail, width={width}");
 
-                return PdfRenderer.Render(SelectedItemStream, width);
+                var bmp = PdfRenderer.Render(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "PDF");
             }
             catch (Exception ex)
             {

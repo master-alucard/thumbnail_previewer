@@ -23,7 +23,8 @@ namespace ThumbnailPreviewer.Handlers
                 ThumbnailLogger.Debug(nameof(OpenOfficeThumbnailHandler),
                     $"Generating thumbnail, width={width}");
 
-                return ZipThumbnailExtractor.ExtractOpenDocumentThumbnail(SelectedItemStream, width);
+                var bmp = ZipThumbnailExtractor.ExtractOpenDocumentThumbnail(SelectedItemStream, width);
+                return BadgeOverlay.Apply(bmp, "ODF");
             }
             catch (Exception ex)
             {
