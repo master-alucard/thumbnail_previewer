@@ -10,6 +10,7 @@
     <Product>ThumbnailPreviewer</Product>
     <Company>Katador</Company>
     <Version>1.0.0</Version>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

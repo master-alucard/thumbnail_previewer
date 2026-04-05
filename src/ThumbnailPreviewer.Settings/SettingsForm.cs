@@ -32,6 +32,10 @@ namespace ThumbnailPreviewer.Settings
             StartPosition = FormStartPosition.CenterScreen;
             Font = new Font("Segoe UI", 9f);
 
+            // Set window icon from embedded EXE resource
+            try { Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location); }
+            catch { }
+
             // Header label
             var lblHeader = new Label
             {
