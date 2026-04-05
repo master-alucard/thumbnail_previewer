@@ -1,0 +1,29 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.vs/
+.vs/
+packages/
+*.nupkg
+*.snupkg
+
+## Build output
+dist/
+publish/
+
+## Bundled Ghostscript binaries (downloaded in CI)
+src/ThumbnailPreviewer.Installer/deps/ghostscript/
+
+## Inno Setup
+src/ThumbnailPreviewer.Installer/Output/
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Logs
+*.log

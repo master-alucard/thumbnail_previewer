@@ -1,0 +1,105 @@
+stages:
+  - build
+  - package
+  - release
+
+variables:
+  DOTNET_VERSION: "8.0"
+  GS_VERSION: "10070"
+  GS_URL: "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs${GS_VERSION}/gs${GS_VERSION}w64.exe"
+  SOLUTION_PATH: "ThumbnailPreviewer.sln"
+  PROJECT_PATH: "src/ThumbnailPreviewer/ThumbnailPreviewer.csproj"
+
+# ============================================================
+# Build the .NET project
+# ============================================================
+build:
+  stage: build
+  tags:
+    - windows
+    - shared-windows
+  script:
+    - dotnet restore $PROJECT_PATH
+    - dotnet build $PROJECT_PATH -c Release -p:Platform=x64 --no-restore
+  artifacts:
+    paths:
+      - src/ThumbnailPreviewer/bin/x64/Release/net48/
+    expire_in: 1 hour
+
+# ============================================================
+# Package: create dist folder, download Ghostscript, build installer
+# ============================================================
+package:
+  stage: package
+  tags:
+    - windows
+    - shared-windows
+  needs:
+    - build
+  script:
+    # --- Prepare dist ---
+    - New-Item -ItemType Directory -Force -Path dist | Out-Null
+    - Copy-Item "src\ThumbnailPreviewer\bin\x64\Release\net48\*" dist\ -Recurse -Force
+
+    # Clean non-Windows platform files
+    - $removeDirs = @("arm","arm64","x86","loongarch64","riscv64","musl-arm","musl-arm64","musl-x64","musl-x86","musl-loongarch64","musl-riscv64")
+    - foreach ($d in $removeDirs) { $p = "dist\$d"; if (Test-Path $p) { Remove-Item $p -Recurse -Force } }
+    - Get-ChildItem dist -Filter "*.dylib" -Recurse | Remove-Item -Force
+    - Get-ChildItem dist -Filter "*.so" -Recurse | Remove-Item -Force
+
+    # --- Download and extract Ghostscript ---
+    - $gsDir = "src\ThumbnailPreviewer.Installer\deps\ghostscript"
+    - New-Item -ItemType Directory -Force -Path $gsDir | Out-Null
+    - Write-Host "Downloading Ghostscript..."
+    - Invoke-WebRequest -Uri $env:GS_URL -OutFile gs_installer.exe -UseBasicParsing
+    - Write-Host "Extracting Ghostscript..."
+    - 7z x -ogs_extract gs_installer.exe -y | Out-Null
+    - Copy-Item "gs_extract\bin\gsdll64.dll" $gsDir\
+    - Copy-Item "gs_extract\Resource" $gsDir\ -Recurse
+    - Copy-Item "gs_extract\lib" $gsDir\ -Recurse
+    - Copy-Item "gs_extract\iccprofiles" $gsDir\ -Recurse
+    - Remove-Item gs_installer.exe -Force
+    - Remove-Item gs_extract -Recurse -Force
+
+    # --- Build installer ---
+    - Write-Host "Building installer..."
+    # Install Inno Setup if not present
+    - |
+      $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+      if (-not (Test-Path $iscc)) {
+        $iscc = "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+      }
+      if (-not (Test-Path $iscc)) {
+        Write-Host "Installing Inno Setup..."
+        choco install innosetup -y --no-progress 2>$null
+        $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+      }
+      & $iscc "src\ThumbnailPreviewer.Installer\installer.iss"
+  artifacts:
+    paths:
+      - src/ThumbnailPreviewer.Installer/Output/*.exe
+      - dist/
+    expire_in: 30 days
+
+# ============================================================
+# Release: create GitLab release on tags
+# ============================================================
+release:
+  stage: release
+  tags:
+    - windows
+    - shared-windows
+  needs:
+    - package
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - Write-Host "Creating release for tag $env:CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "ThumbnailPreviewer $CI_COMMIT_TAG"
+    description: "Windows Explorer thumbnail preview handler for EPS, AI, PDF, CSV, PSD, DOCX, OpenOffice, SVG, DNG and RAW files."
+    assets:
+      links:
+        - name: "ThumbnailPreviewerSetup.exe"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/src/ThumbnailPreviewer.Installer/Output/ThumbnailPreviewerSetup-1.0.0.exe"
