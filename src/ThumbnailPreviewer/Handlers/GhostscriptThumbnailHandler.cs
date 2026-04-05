@@ -19,11 +19,15 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(GhostscriptThumbnailHandler),
-                    $"Generating thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("eps"))
+                    return null;
 
                 var bmp = GhostscriptRenderer.Render(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "EPS");
+
+                if (SettingsManager.IsBadgeEnabled("eps"))
+                    BadgeOverlay.Apply(bmp, "EPS");
+
+                return bmp;
             }
             catch (Exception ex)
             {

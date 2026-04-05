@@ -17,11 +17,15 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(DocxThumbnailHandler),
-                    $"Generating thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("docx"))
+                    return null;
 
                 var bmp = DocxRenderer.Render(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "DOCX");
+
+                if (SettingsManager.IsBadgeEnabled("docx"))
+                    BadgeOverlay.Apply(bmp, "DOCX");
+
+                return bmp;
             }
             catch (Exception ex)
             {

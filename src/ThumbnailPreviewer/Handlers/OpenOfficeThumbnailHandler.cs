@@ -20,11 +20,15 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(OpenOfficeThumbnailHandler),
-                    $"Generating thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("odt"))
+                    return null;
 
                 var bmp = ZipThumbnailExtractor.ExtractOpenDocumentThumbnail(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "ODF");
+
+                if (SettingsManager.IsBadgeEnabled("odt"))
+                    BadgeOverlay.Apply(bmp, "ODF");
+
+                return bmp;
             }
             catch (Exception ex)
             {

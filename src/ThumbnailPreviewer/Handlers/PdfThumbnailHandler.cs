@@ -8,10 +8,6 @@ using ThumbnailPreviewer.Renderers;
 
 namespace ThumbnailPreviewer.Handlers
 {
-    /// <summary>
-    /// PDF thumbnail handler using PDFium — renders the first page as a thumbnail.
-    /// No external dependencies needed (PDFium is bundled via NuGet).
-    /// </summary>
     [ComVisible(true)]
     [Guid("1A2B3C4D-5E6F-4A8B-9C0D-1E2F3A4B5C6D")]
     [COMServerAssociation(AssociationType.FileExtension, ".pdf")]
@@ -21,15 +17,19 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(PdfThumbnailHandler),
-                    $"Generating PDF thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("pdf"))
+                    return null;
 
                 var bmp = PdfRenderer.Render(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "PDF");
+
+                if (SettingsManager.IsBadgeEnabled("pdf"))
+                    BadgeOverlay.Apply(bmp, "PDF");
+
+                return bmp;
             }
             catch (Exception ex)
             {
-                ThumbnailLogger.Error(nameof(PdfThumbnailHandler), "Failed to generate PDF thumbnail", ex);
+                ThumbnailLogger.Error(nameof(PdfThumbnailHandler), "Failed to generate thumbnail", ex);
                 return null;
             }
         }

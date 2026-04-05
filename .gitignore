@@ -12,6 +12,7 @@ packages/
 
 ## Build output
 dist/
+dist-settings/
 publish/
 
 ## Bundled Ghostscript binaries (downloaded in CI)

@@ -8,9 +8,6 @@ using ThumbnailPreviewer.Renderers;
 
 namespace ThumbnailPreviewer.Handlers
 {
-    /// <summary>
-    /// SVG thumbnail handler via Magick.NET.
-    /// </summary>
     [ComVisible(true)]
     [Guid("B3C4D5E6-F7A8-4901-BC23-DEF456789012")]
     [COMServerAssociation(AssociationType.FileExtension, ".svg")]
@@ -21,23 +18,24 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(SvgThumbnailHandler),
-                    $"Generating SVG thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("svg"))
+                    return null;
 
                 var bmp = MagickRenderer.RenderImage(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "SVG");
+
+                if (SettingsManager.IsBadgeEnabled("svg"))
+                    BadgeOverlay.Apply(bmp, "SVG");
+
+                return bmp;
             }
             catch (Exception ex)
             {
-                ThumbnailLogger.Error(nameof(SvgThumbnailHandler), "Failed to generate SVG thumbnail", ex);
+                ThumbnailLogger.Error(nameof(SvgThumbnailHandler), "Failed to generate thumbnail", ex);
                 return null;
             }
         }
     }
 
-    /// <summary>
-    /// PSD thumbnail handler via Magick.NET.
-    /// </summary>
     [ComVisible(true)]
     [Guid("A1B2C3D4-E5F6-4789-AB01-23456789CDEF")]
     [COMServerAssociation(AssociationType.FileExtension, ".psd")]
@@ -47,23 +45,24 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(PsdThumbnailHandler),
-                    $"Generating PSD thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("psd"))
+                    return null;
 
                 var bmp = MagickRenderer.RenderImage(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "PSD");
+
+                if (SettingsManager.IsBadgeEnabled("psd"))
+                    BadgeOverlay.Apply(bmp, "PSD");
+
+                return bmp;
             }
             catch (Exception ex)
             {
-                ThumbnailLogger.Error(nameof(PsdThumbnailHandler), "Failed to generate PSD thumbnail", ex);
+                ThumbnailLogger.Error(nameof(PsdThumbnailHandler), "Failed to generate thumbnail", ex);
                 return null;
             }
         }
     }
 
-    /// <summary>
-    /// DNG and camera RAW file thumbnails via Magick.NET with fast-path extraction.
-    /// </summary>
     [ComVisible(true)]
     [Guid("C4D5E6F7-A8B9-4012-CD34-EF5678901234")]
     [COMServerAssociation(AssociationType.FileExtension, ".dng")]
@@ -82,15 +81,19 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(RawThumbnailHandler),
-                    $"Generating RAW thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("dng"))
+                    return null;
 
                 var bmp = MagickRenderer.RenderRaw(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "RAW");
+
+                if (SettingsManager.IsBadgeEnabled("dng"))
+                    BadgeOverlay.Apply(bmp, "RAW");
+
+                return bmp;
             }
             catch (Exception ex)
             {
-                ThumbnailLogger.Error(nameof(RawThumbnailHandler), "Failed to generate RAW thumbnail", ex);
+                ThumbnailLogger.Error(nameof(RawThumbnailHandler), "Failed to generate thumbnail", ex);
                 return null;
             }
         }

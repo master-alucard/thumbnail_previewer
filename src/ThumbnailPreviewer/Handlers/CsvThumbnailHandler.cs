@@ -18,11 +18,15 @@ namespace ThumbnailPreviewer.Handlers
         {
             try
             {
-                ThumbnailLogger.Debug(nameof(CsvThumbnailHandler),
-                    $"Generating thumbnail, width={width}");
+                if (!SettingsManager.IsPreviewEnabled("csv"))
+                    return null;
 
                 var bmp = CsvRenderer.Render(SelectedItemStream, width);
-                return BadgeOverlay.Apply(bmp, "CSV");
+
+                if (SettingsManager.IsBadgeEnabled("csv"))
+                    BadgeOverlay.Apply(bmp, "CSV");
+
+                return bmp;
             }
             catch (Exception ex)
             {

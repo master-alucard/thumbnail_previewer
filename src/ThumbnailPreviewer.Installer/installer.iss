@@ -28,7 +28,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-DisableProgramGroupPage=yes
+DisableProgramGroupPage=auto
 OutputDir=Output
 OutputBaseFilename=ThumbnailPreviewerSetup-{#MyAppVersion}
 Compression=lzma2/ultra64
@@ -52,8 +52,15 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ; Main DLL and all dependencies
 Source: "..\..\dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
+; Settings app
+Source: "..\..\dist-settings\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+
 ; Bundled Ghostscript
 Source: "deps\ghostscript\*"; DestDir: "{app}\ghostscript"; Flags: ignoreversion recursesubdirs
+
+[Icons]
+Name: "{group}\ThumbnailPreviewer Settings"; Filename: "{app}\ThumbnailPreviewer.Settings.exe"
+Name: "{group}\Uninstall ThumbnailPreviewer"; Filename: "{uninstallexe}"
 
 [Registry]
 ; =====================================================================
