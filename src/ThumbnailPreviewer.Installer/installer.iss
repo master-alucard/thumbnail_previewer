@@ -10,7 +10,8 @@
 ; Note: use {{...} for literal braces in Inno Setup
 #define CLSID_Pdf       "{{1A2B3C4D-5E6F-4A8B-9C0D-1E2F3A4B5C6D}"
 #define CLSID_Docx      "{{A2B3C4D5-E6F7-4890-AB12-CDEF34567890}"
-#define CLSID_Image     "{{B3C4D5E6-F7A8-4901-BC23-DEF456789012}"
+#define CLSID_Svg       "{{B3C4D5E6-F7A8-4901-BC23-DEF456789012}"
+#define CLSID_Psd       "{{A1B2C3D4-E5F6-4789-AB01-23456789CDEF}"
 #define CLSID_Raw       "{{C4D5E6F7-A8B9-4012-CD34-EF5678901234}"
 #define CLSID_Gs        "{{D5E6F7A8-B9C0-4123-DE45-F67890123456}"
 #define CLSID_OpenOffice "{{F1A2B3C4-D5E6-4F78-9012-3456789ABCDE}"
@@ -69,11 +70,11 @@ Root: HKCR; Subkey: ".pdf\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueDat
 Root: HKCR; Subkey: ".docx\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Docx}"; Flags: uninsdeletekey
 
 ; --- PSD ---
-Root: HKCR; Subkey: ".psd\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Image}"; Flags: uninsdeletekey
+Root: HKCR; Subkey: ".psd\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Psd}"; Flags: uninsdeletekey
 
 ; --- SVG ---
-Root: HKCR; Subkey: ".svg\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Image}"; Flags: uninsdeletekey
-Root: HKCR; Subkey: ".svgz\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Image}"; Flags: uninsdeletekey
+Root: HKCR; Subkey: ".svg\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Svg}"; Flags: uninsdeletekey
+Root: HKCR; Subkey: ".svgz\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Svg}"; Flags: uninsdeletekey
 
 ; --- RAW / DNG ---
 Root: HKCR; Subkey: ".dng\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Raw}"; Flags: uninsdeletekey
