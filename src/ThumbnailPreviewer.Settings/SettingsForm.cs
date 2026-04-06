@@ -183,24 +183,45 @@ namespace ThumbnailPreviewer.Settings
                 SettingsManager.SetBadgeEnabled(ext, badge);
             }
 
-            // Clear Windows thumbnail cache so changes take effect immediately
-            ClearThumbnailCache();
+            var result = MessageBox.Show(
+                "Settings saved.\n\nRestart Explorer now to apply changes?\n(Explorer windows will close briefly)",
+                "Restart Explorer",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
 
-            _lblStatus.ForeColor = Color.FromArgb(0, 120, 0);
-            _lblStatus.Text = "Settings saved. Reopen folders to see changes.";
+            if (result == DialogResult.Yes)
+            {
+                ClearCacheAndRestartExplorer();
+                _lblStatus.ForeColor = Color.FromArgb(0, 120, 0);
+                _lblStatus.Text = "Settings applied. Explorer restarted.";
+            }
+            else
+            {
+                _lblStatus.ForeColor = Color.FromArgb(0, 120, 0);
+                _lblStatus.Text = "Settings saved. Restart Explorer to apply.";
+            }
         }
 
-        private static void ClearThumbnailCache()
+        private static void ClearCacheAndRestartExplorer()
         {
             try
             {
-                // Kill COM surrogate that may hold old handler state
+                // Kill COM surrogates holding our DLL
                 foreach (var p in Process.GetProcessesByName("dllhost"))
                 {
                     try { p.Kill(); } catch { }
                 }
 
-                // Delete Windows thumbnail cache files
+                // Stop Explorer so it releases thumbnail cache file locks
+                foreach (var p in Process.GetProcessesByName("explorer"))
+                {
+                    try { p.Kill(); } catch { }
+                }
+
+                // Brief wait for file handles to release
+                System.Threading.Thread.Sleep(1500);
+
+                // Delete thumbnail cache files (now unlocked)
                 var explorerCache = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     @"Microsoft\Windows\Explorer");
@@ -216,6 +237,9 @@ namespace ThumbnailPreviewer.Settings
                         try { File.Delete(file); } catch { }
                     }
                 }
+
+                // Restart Explorer
+                Process.Start("explorer.exe");
             }
             catch { }
         }
