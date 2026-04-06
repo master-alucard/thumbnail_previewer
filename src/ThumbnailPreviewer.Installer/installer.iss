@@ -13,7 +13,8 @@
 #define CLSID_Svg       "{{B3C4D5E6-F7A8-4901-BC23-DEF456789012}"
 #define CLSID_Psd       "{{A1B2C3D4-E5F6-4789-AB01-23456789CDEF}"
 #define CLSID_Raw       "{{C4D5E6F7-A8B9-4012-CD34-EF5678901234}"
-#define CLSID_Gs        "{{D5E6F7A8-B9C0-4123-DE45-F67890123456}"
+#define CLSID_Eps       "{{D5E6F7A8-B9C0-4123-DE45-F67890123456}"
+#define CLSID_Ai        "{{2B3C4D5E-6F7A-4B8C-9D0E-1F2A3B4C5D6E}"
 #define CLSID_OpenOffice "{{F1A2B3C4-D5E6-4F78-9012-3456789ABCDE}"
 #define CLSID_Csv       "{{E6F7A8B9-C0D1-4234-EF56-789012345678}"
 
@@ -95,10 +96,12 @@ Root: HKCR; Subkey: ".raf\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueDat
 Root: HKCR; Subkey: ".srw\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Raw}"; Flags: uninsdeletekey
 Root: HKCR; Subkey: ".pef\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Raw}"; Flags: uninsdeletekey
 
-; --- EPS / AI / PS ---
-Root: HKCR; Subkey: ".eps\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Gs}"; Flags: uninsdeletekey
-Root: HKCR; Subkey: ".ai\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Gs}"; Flags: uninsdeletekey
-Root: HKCR; Subkey: ".ps\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Gs}"; Flags: uninsdeletekey
+; --- EPS / PS ---
+Root: HKCR; Subkey: ".eps\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Eps}"; Flags: uninsdeletekey
+Root: HKCR; Subkey: ".ps\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Eps}"; Flags: uninsdeletekey
+
+; --- AI ---
+Root: HKCR; Subkey: ".ai\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_Ai}"; Flags: uninsdeletekey
 
 ; --- OpenOffice ---
 Root: HKCR; Subkey: ".odt\shellex\{#SHELLEX_THUMB}"; ValueType: string; ValueData: "{#CLSID_OpenOffice}"; Flags: uninsdeletekey

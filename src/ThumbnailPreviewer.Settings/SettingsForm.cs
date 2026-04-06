@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using ThumbnailPreviewer.Infrastructure;
 
@@ -181,8 +183,41 @@ namespace ThumbnailPreviewer.Settings
                 SettingsManager.SetBadgeEnabled(ext, badge);
             }
 
+            // Clear Windows thumbnail cache so changes take effect immediately
+            ClearThumbnailCache();
+
             _lblStatus.ForeColor = Color.FromArgb(0, 120, 0);
-            _lblStatus.Text = "Settings saved. Changes take effect on new thumbnails.";
+            _lblStatus.Text = "Settings saved. Reopen folders to see changes.";
+        }
+
+        private static void ClearThumbnailCache()
+        {
+            try
+            {
+                // Kill COM surrogate that may hold old handler state
+                foreach (var p in Process.GetProcessesByName("dllhost"))
+                {
+                    try { p.Kill(); } catch { }
+                }
+
+                // Delete Windows thumbnail cache files
+                var explorerCache = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    @"Microsoft\Windows\Explorer");
+
+                if (Directory.Exists(explorerCache))
+                {
+                    foreach (var file in Directory.GetFiles(explorerCache, "thumbcache_*"))
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                    foreach (var file in Directory.GetFiles(explorerCache, "iconcache_*"))
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                }
+            }
+            catch { }
         }
 
         private void BtnReset_Click(object sender, EventArgs e)
