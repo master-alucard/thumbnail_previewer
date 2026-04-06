@@ -152,13 +152,8 @@ procedure SyncBadgeState(Sender: TObject);
 var
   i: Integer;
 begin
-  // When a Preview checkbox changes, enable/disable matching Badge checkbox
   for i := 0 to EXT_COUNT - 1 do
-  begin
     BadgeList.ItemEnabled[i] := PreviewList.Checked[i];
-    if not PreviewList.Checked[i] then
-      BadgeList.Checked[i] := False;
-  end;
 end;
 
 procedure CreateConfigPage();

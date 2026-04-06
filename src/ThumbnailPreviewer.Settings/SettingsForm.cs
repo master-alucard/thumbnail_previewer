@@ -197,15 +197,12 @@ namespace ThumbnailPreviewer.Settings
 
             if (!previewOn)
             {
-                // Disable and uncheck badge
-                row.Cells[ColBadge].Value = false;
                 row.Cells[ColBadge].ReadOnly = true;
                 row.Cells[ColBadge].Style.BackColor = Color.FromArgb(240, 240, 240);
                 row.Cells[ColBadge].Style.ForeColor = Color.LightGray;
             }
             else
             {
-                // Re-enable badge
                 row.Cells[ColBadge].ReadOnly = false;
                 row.Cells[ColBadge].Style.BackColor = Color.White;
                 row.Cells[ColBadge].Style.ForeColor = Color.Black;
