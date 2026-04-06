@@ -112,6 +112,16 @@ namespace ThumbnailPreviewer.Settings
             };
             _btnSave.Click += BtnSave_Click;
 
+            // Commit checkbox changes immediately (not on row leave)
+            _grid.CurrentCellDirtyStateChanged += (s, ev) =>
+            {
+                if (_grid.IsCurrentCellDirty)
+                    _grid.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            };
+
+            // When Preview is unchecked, disable and uncheck Badge
+            _grid.CellValueChanged += Grid_CellValueChanged;
+
             _btnReset = new Button
             {
                 Text = "Reset Defaults",
@@ -159,15 +169,47 @@ namespace ThumbnailPreviewer.Settings
                 bool preview = SettingsManager.IsPreviewEnabled(ext.Extension);
                 bool badge = SettingsManager.IsBadgeEnabled(ext.Extension);
 
-                _grid.Rows.Add(
+                int row = _grid.Rows.Add(
                     $".{ext.Extension}",
                     ext.Description,
                     preview,
                     badge
                 );
+
+                // If preview is off, disable badge cell
+                if (!preview)
+                {
+                    _grid.Rows[row].Cells[ColBadge].ReadOnly = true;
+                    _grid.Rows[row].Cells[ColBadge].Style.BackColor = Color.FromArgb(240, 240, 240);
+                    _grid.Rows[row].Cells[ColBadge].Style.ForeColor = Color.LightGray;
+                }
             }
 
             _lblStatus.Text = "";
+        }
+
+        private void Grid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex != ColPreview) return;
+
+            var row = _grid.Rows[e.RowIndex];
+            bool previewOn = (bool)(row.Cells[ColPreview].Value ?? true);
+
+            if (!previewOn)
+            {
+                // Disable and uncheck badge
+                row.Cells[ColBadge].Value = false;
+                row.Cells[ColBadge].ReadOnly = true;
+                row.Cells[ColBadge].Style.BackColor = Color.FromArgb(240, 240, 240);
+                row.Cells[ColBadge].Style.ForeColor = Color.LightGray;
+            }
+            else
+            {
+                // Re-enable badge
+                row.Cells[ColBadge].ReadOnly = false;
+                row.Cells[ColBadge].Style.BackColor = Color.White;
+                row.Cells[ColBadge].Style.ForeColor = Color.Black;
+            }
         }
 
         private void BtnSave_Click(object sender, EventArgs e)

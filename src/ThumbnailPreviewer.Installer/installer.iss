@@ -148,6 +148,19 @@ begin
   ExtNames[23] := 'pef';   ExtDescs[23] := '.pef  -  Pentax RAW';
 end;
 
+procedure SyncBadgeState(Sender: TObject);
+var
+  i: Integer;
+begin
+  // When a Preview checkbox changes, enable/disable matching Badge checkbox
+  for i := 0 to EXT_COUNT - 1 do
+  begin
+    BadgeList.ItemEnabled[i] := PreviewList.Checked[i];
+    if not PreviewList.Checked[i] then
+      BadgeList.Checked[i] := False;
+  end;
+end;
+
 procedure CreateConfigPage();
 var
   i: Integer;
@@ -175,6 +188,7 @@ begin
   PreviewList.Width := (ConfigPage.SurfaceWidth div 2) - 8;
   PreviewList.Height := ConfigPage.SurfaceHeight - 24;
   PreviewList.Flat := True;
+  PreviewList.OnClickCheck := @SyncBadgeState;
 
   for i := 0 to EXT_COUNT - 1 do
   begin
