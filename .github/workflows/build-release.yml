@@ -1,0 +1,114 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  GS_VERSION: '10070'
+
+jobs:
+  build:
+    name: Build & Package
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore NuGet packages
+        run: dotnet restore ThumbnailPreviewer.sln
+
+      - name: Build solution
+        run: dotnet build ThumbnailPreviewer.sln -c Release -p:Platform=x64 --no-restore
+
+      - name: Prepare handler dist
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item "src\ThumbnailPreviewer\bin\x64\Release\net48\*" dist\ -Recurse -Force
+          # Clean non-Windows platform files
+          $removeDirs = @("arm","arm64","x86","loongarch64","riscv64","musl-arm","musl-arm64","musl-x64","musl-x86","musl-loongarch64","musl-riscv64")
+          foreach ($d in $removeDirs) { $p = "dist\$d"; if (Test-Path $p) { Remove-Item $p -Recurse -Force } }
+          Get-ChildItem dist -Filter "*.dylib" -Recurse | Remove-Item -Force
+          Get-ChildItem dist -Filter "*.so" -Recurse | Remove-Item -Force
+
+      - name: Prepare settings app dist
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist-settings | Out-Null
+          Copy-Item "src\ThumbnailPreviewer.Settings\bin\x64\Release\net48\ThumbnailPreviewer.Settings.exe" dist-settings\
+
+      - name: Download and extract Ghostscript
+        shell: pwsh
+        run: |
+          $gsUrl = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs${{ env.GS_VERSION }}/gs${{ env.GS_VERSION }}w64.exe"
+          $gsDir = "src\ThumbnailPreviewer.Installer\deps\ghostscript"
+          New-Item -ItemType Directory -Force -Path $gsDir | Out-Null
+          Write-Host "Downloading Ghostscript..."
+          Invoke-WebRequest -Uri $gsUrl -OutFile gs_installer.exe -UseBasicParsing
+          Write-Host "Extracting..."
+          7z x -ogs_extract gs_installer.exe -y | Out-Null
+          Copy-Item "gs_extract\bin\gsdll64.dll" $gsDir\
+          Copy-Item "gs_extract\Resource" $gsDir\ -Recurse
+          Copy-Item "gs_extract\lib" $gsDir\ -Recurse
+          Copy-Item "gs_extract\iccprofiles" $gsDir\ -Recurse
+          Remove-Item gs_installer.exe, gs_extract -Recurse -Force
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $iscc "src\ThumbnailPreviewer.Installer\installer.iss"
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ThumbnailPreviewerSetup
+          path: src/ThumbnailPreviewer.Installer/Output/*.exe
+          retention-days: 90
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ThumbnailPreviewerSetup
+          path: installer
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "ThumbnailPreviewer ${{ github.ref_name }}"
+          body: |
+            Windows Explorer thumbnail preview handler for EPS, AI, PDF, CSV, PSD, DOCX, OpenOffice, SVG, DNG and RAW files.
+
+            ### Download
+            Download **ThumbnailPreviewerSetup.exe** below and run it.
+
+            ### What's included
+            - Thumbnail previews for 24+ file formats
+            - Settings app to toggle previews and badges per extension
+            - Bundled Ghostscript and PDFium (no extra installs needed)
+          files: installer/*.exe
+          draft: false
+          prerelease: false
